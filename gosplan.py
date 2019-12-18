@@ -32,6 +32,7 @@ class Gosplan:
 
         for repo in unplanned_repos:
             self._upload_dave(repo)
+            self._upload_resignation(repo)
             self._clobber_repo(repo)
 
 
@@ -39,12 +40,12 @@ class Gosplan:
 
     # Clobber the offending repo
     def _clobber_repo(self, repo_name):
-        repo = self.client.get_repo(repo_name)
+        repo = self.client.get_repo(f'gosplan/{repo_name}')
         readme_contents = repo.get_contents("README.md")
         repo.update_file(
             readme_contents.path, 
             "YOU MUST COMPLY", 
-            "![Image of glory and power](sad_dave.png)", 
+            "![Image of glory and power](gosplan.png) <br/> ![Image of great sadness and misery](sad_dave.png)", 
             readme_contents.sha, 
             branch="master"
         )
@@ -53,7 +54,16 @@ class Gosplan:
     def _upload_dave(self, repo_name):
         with open('assets/gosplan.png', 'rb') as image:
             data = image.read()
-            repo = self.client.get_repo(repo_name)
+            repo = self.client.get_repo(f'gosplan/{repo_name}')
+            repo.create_file(
+                path="gosplan.png",
+                branch="master",
+                message="YOU HAVE NO POWER",
+                content=data
+            )
+        with open('assets/sad_dave.png', 'rb') as image:
+            data = image.read()
+            repo = self.client.get_repo(f'gosplan/{repo_name}')
             repo.create_file(
                 path="sad_dave.png",
                 branch="master",
@@ -63,8 +73,16 @@ class Gosplan:
 
     # Upload the resignation letter to the repository
     def _upload_resignation(self, repo_name):
-        print('Uploading resignation letter')
-
+        print('HASTENING THE EXIT OF THE TREACHEROUS SCUM BY UPLOADING MOST HUMBLE, DIGNIFIED AND COMPLIANT RESIGNATION STATEMENT')
+        with open('assets/resignation.md', 'rb') as resignation:
+                data = resignation.read()
+                repo = self.client.get_repo(f'gosplan/{repo_name}')
+                repo.create_file(
+                    path="I_HAVE_FAILED_IN_MY_DUTY_TO_THIS_GREAT_AND_GLORIOUS_ORGANISATION.md",
+                    branch="master",
+                    message="I DO NOT DESERVE TO CONTINUE IN YOUR EMPLOYMENT",
+                    content=data
+                )
 
 
     def _get_all_repos(self):
@@ -83,12 +101,15 @@ class Gosplan:
     def _create_repos(self, names, gosplans):
         org = self.client.get_organization(self.organization)
         for name in names:
-            print(f'Provisioning {name}...')
-            plan = gosplans[name]
-            org.create_repo(
-                name=plan["name"],
-                private=plan['private']
-            )
+            try:
+                print(f'Provisioning {name}...')
+                plan = gosplans[name]
+                org.create_repo(
+                    name=plan["name"],
+                    private=plan['private']
+                )
+            except:
+                print(f'{name} ALREADY EXISTS - NO FURTHER COMPLIANCE IS REQUIRED. CONTINUE ABOUT YOUR DAILY BUSINESS SAFE IN THE KNOWLEDGE THAT YOU WILL NOT BE CLOBBERED AT THIS TIME.')
 
 
     # Apply GOSPLAN config to a repo
