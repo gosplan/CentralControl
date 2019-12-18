@@ -21,4 +21,4 @@ jobs:
       env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       run: |
-        python gosplan.py
+        python main.py
